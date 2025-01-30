@@ -1,0 +1,62 @@
+name: Build and Deploy Resumes
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language: [en, nl]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Pandoc
+      uses: r-lib/actions/setup-pandoc@v2
+      with:
+        pandoc-version: 'latest'
+
+    - name: Convert to PDF
+      run: |
+        if [ "${{ matrix.language }}" == "en" ]; then
+          pandoc resume-en.md -o resume-en.pdf
+        else
+          pandoc resume.md -o resume.pdf
+        fi
+
+    - name: Upload PDF artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: resume-pdf-${{ matrix.language }}
+        path: resume-${{ matrix.language }}.pdf
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      if: matrix.language == 'en' # Deploy only English markdown to main Pages
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: .
+
+  deploy-pdf:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language: [en, nl]
+
+    steps:
+      - name: Download PDF artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: resume-pdf-${{ matrix.language }}
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          publish_branch: pdf-${{ matrix.language }} # Separate branch for each PDF
