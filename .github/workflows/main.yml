@@ -2,7 +2,7 @@ name: Build and Deploy Resumes
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ] # Or your default branch name
   workflow_dispatch:
 
 jobs:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        language: [en, nl]
+        language: [en, nl] # Build for both English and Dutch
 
     steps:
     - uses: actions/checkout@v3
@@ -23,9 +23,9 @@ jobs:
     - name: Convert to PDF
       run: |
         if [ "${{ matrix.language }}" == "en" ]; then
-          pandoc resume-en.md -o resume-en.pdf
+          pandoc resume-en.md -o resume-en.pdf --pdf-engine=wkhtmltopdf
         else
-          pandoc resume.md -o resume.pdf
+          pandoc resume.md -o resume.pdf --pdf-engine=wkhtmltopdf
         fi
 
     - name: Upload PDF artifact
@@ -39,7 +39,7 @@ jobs:
       if: matrix.language == 'en' # Deploy only English markdown to main Pages
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: .
+        publish_dir:.
 
   deploy-pdf:
     needs: build
@@ -58,5 +58,5 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
+          publish_dir:.
           publish_branch: pdf-${{ matrix.language }} # Separate branch for each PDF
