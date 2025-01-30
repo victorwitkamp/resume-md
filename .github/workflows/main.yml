@@ -30,14 +30,14 @@ jobs:
         if [ "${{ matrix.language }}" == "en" ]; then
           pandoc resume-en.md -o resume-en.pdf --pdf-engine=wkhtmltopdf
         else
-          pandoc resume.md -o resume.pdf --pdf-engine=wkhtmltopdf
+          pandoc resume.md -o resume-nl.pdf --pdf-engine=wkhtmltopdf # Corrected file name
         fi
 
     - name: Upload PDF artifact
       uses: actions/upload-artifact@v3
       with:
         name: resume-pdf-${{ matrix.language }}
-        path: resume-${{ matrix.language }}.pdf
+        path: resume-${{ matrix.language }}.pdf # Corrected path
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
