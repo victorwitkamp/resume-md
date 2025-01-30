@@ -20,6 +20,11 @@ jobs:
       with:
         pandoc-version: 'latest'
 
+    - name: Install wkhtmltopdf
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wkhtmltopdf
+
     - name: Convert to PDF
       run: |
         if [ "${{ matrix.language }}" == "en" ]; then
@@ -39,7 +44,8 @@ jobs:
       if: matrix.language == 'en' # Deploy only English markdown to main Pages
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: .
+        publish_dir: . # Publish the root directory for English Markdown
+
   deploy-pdf:
     needs: [build]
     runs-on: ubuntu-latest
